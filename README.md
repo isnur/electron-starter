@@ -1,6 +1,6 @@
-## Electron + TypeScript + React
+# Electron + Starter
 
-Boilerplate for a project using Electron, React and Typescript.
+Boilerplate for a project using Electron, React, Typescript, Sqlite3 and Material UI.
 
 ## Installation
 

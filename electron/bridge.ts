@@ -8,16 +8,28 @@ export const api = {
    *
    * The function below can accessed using `window.Main.sayHello`
    */
-
-  sendMessage: (message: string) => { 
-    ipcRenderer.send('message', message)
+  send(sql: string) {
+    return new Promise((resolve) => {
+      ipcRenderer.once('asynchronous-reply', (_, arg) => {
+        resolve(arg);
+        // eslint-disable-next-line no-console
+        console.log(arg);
+      });
+      ipcRenderer.send('asynchronous-message', sql);
+    });
   },
 
   /**
    * Provide an easier way to listen to events
    */
-  on: (channel: string, callback: Function) => {
+   on: (channel: string, callback: Function) => {
     ipcRenderer.on(channel, (_, data) => callback(data))
+  },
+  /**
+   * Provide an easier way to listen to events
+   */
+  once: (channel: string, callback: Function) => {
+    ipcRenderer.once(channel, (_, data) => callback(data))
   }
 }
 

@@ -1,14 +1,17 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
+import MenuBuilder from './menu'
+import sqlite3 from 'better-sqlite3'
+import path from 'path'
 
 let mainWindow: BrowserWindow | null
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
 
-// const assetsPath =
-//   process.env.NODE_ENV === 'production'
-//     ? process.resourcesPath
-//     : app.getAppPath()
+const assetsPath =
+  process.env.NODE_ENV === 'production'
+    ? process.resourcesPath
+    : app.getAppPath()
 
 function createWindow () {
   mainWindow = new BrowserWindow({
@@ -25,6 +28,9 @@ function createWindow () {
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 
+  const menuBuilder = new MenuBuilder(mainWindow)
+  menuBuilder.buildMenu()
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
@@ -34,9 +40,13 @@ async function registerListeners () {
   /**
    * This comes from bridge integration, check bridge.ts
    */
-  ipcMain.on('message', (_, message) => {
-    console.log(message)
-  })
+  ipcMain.on('asynchronous-message', (event, arg) => {
+    const db = sqlite3(path.join(assetsPath, 'assets', 'db.sqlite3'))
+    const sql = arg
+    const rows = db.prepare(sql)
+    console.log(rows.all())
+    event.reply('asynchronous-reply', rows.all())
+  });
 }
 
 app.on('ready', createWindow)
